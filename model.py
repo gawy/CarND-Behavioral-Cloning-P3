@@ -1,15 +1,18 @@
-import keras.models
+import argparse
+import logging
+
 from keras.models import Sequential
 from keras.layers import Activation, Dense, Flatten, Convolution2D, MaxPool2D, Cropping2D, Lambda, Input, Dropout
-import csv
-import scipy.ndimage as ndimage
-import numpy as np
-import cv2
-import logging
-from sklearn.utils import shuffle as sk_shuffle
-from sklearn.model_selection import train_test_split
 from keras.applications.vgg16 import VGG16
 from keras.models import Model
+
+import csv
+import numpy as np
+import random as rnd
+import cv2
+
+from sklearn.utils import shuffle as sk_shuffle
+from sklearn.model_selection import train_test_split
 
 image_size = (160, 320, 3)
 
@@ -23,7 +26,7 @@ def drive_model_create():
     k_size = (5,5)
 
     model = Sequential()
-    model.add(Cropping2D(((60, 0), (0, 0)), input_shape=image_size))
+    model.add(Cropping2D(((60, 20), (0, 0)), input_shape=image_size))
     model.add(Lambda(lambda x: x / 255.0 - 0.5))
 
     model.add(Convolution2D(6, k_size, padding='same'))
@@ -34,9 +37,9 @@ def drive_model_create():
     model.add(Activation('relu'))
     model.add(MaxPool2D((2,2)))
 
-    model.add(Convolution2D(24, k_size, padding='same'))
-    model.add(Activation('relu'))
-    model.add(MaxPool2D((2,2)))
+    # model.add(Convolution2D(24, k_size, padding='same'))
+    # model.add(Activation('relu'))
+    # model.add(MaxPool2D((2,2)))
 
     model.add(Flatten())
     model.add(Dropout(0.4))
@@ -82,6 +85,7 @@ def create_vgg():
     log.info('Done creating model.')
     return model
 
+
 # Executes training code for any Keras model.
 def train_in_driving_with_generator(train_gen, valid_gen, train_data_len, valid_data_len, model):
     log = logging.getLogger(__name__)
@@ -95,15 +99,16 @@ def train_in_driving_with_generator(train_gen, valid_gen, train_data_len, valid_
     log.info('Saving model to model.h5')
     model.save("model.h5")
 
+
 # Executes training code for any Keras model.
-def train_in_driving(x_data, y_data, model):
+def train_in_driving(x_data, y_data, model, epochs_count=3):
     log = logging.getLogger(__name__)
 
     log.info('Start trainig...')
 
     # Compile and train model
     model.compile('adam', 'mean_squared_error')
-    model.fit(x_data, y_data, epochs=3, validation_split=0.2, shuffle=True)
+    model.fit(x_data, y_data, epochs=epochs_count, validation_split=0.2, shuffle=True)
 
     log.info('Saving model to model.h5')
     model.save("model.h5")
@@ -174,6 +179,7 @@ def load_samples(samples):
     y_data = []
     for row in samples:
         s_angle = float(row[3])
+        if abs(s_angle) < 0.05 and rnd.random() <= 0.85: continue
         im_path, l_im_path, r_im_path = row[0], row[1], row[2]
 
         load_image(im_path, s_angle, x_data, y_data)
@@ -217,6 +223,12 @@ if __name__ == '__main__' :
     logging.basicConfig(level=logging.INFO)
     log = logging.getLogger(__name__)
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('epochs', type=int, default=3, help='Amount of epochs to run training for')
+
+    args = parser.parse_args()
+    epochs_count = args.epochs
+
     # with generators
     # train_gen, valid_gen, train_len, valid_len = create_data_generators()
     #
@@ -227,4 +239,4 @@ if __name__ == '__main__' :
     # without generator
     model = drive_model_create()
     x_data, y_data = read_all_data_to_memory()
-    train_in_driving(x_data, y_data, model)
+    train_in_driving(x_data, y_data, model, epochs_count)
