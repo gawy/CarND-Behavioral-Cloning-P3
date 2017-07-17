@@ -89,8 +89,17 @@ Start fresh.
 
 Result: Ran into self-oscilating scenario
 
-#### Experiment x.008
+#### Experiment x.009
 x.008 changes: Train with full data set
 
 Retraining for 15 epochs. Full sample set
 Result: completely failed
+
+#### Experiment x.010
+x.008 changes: Train with full data set
+x.008 approach to filtering image data set. 
+Flip by it self is only probabilistic (70%) but main image is always present.
+Batch size increased
+
+Retraining for 15 epochs. Full sample set
+Result: 

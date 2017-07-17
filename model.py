@@ -220,18 +220,17 @@ def load_image(im_path, s_angle, x_data, y_data, allow_flip=True, main_only=True
 
     rand = rnd.random()
 
+    # process image
+    x_data.append(im)
+    y_data.append(s_angle)
 
+    if main_only: return
 
-    # if main_only: return
-
-    if not main_only and allow_flip and rnd.random() < 0.5:
+    if allow_flip and rnd.random() < 0.7:
         # add flipped images to avoid one side bias
         y_data.append(-(s_angle))
         x_data.append(np.fliplr(im))
-    else:
-        # process image
-        x_data.append(im)
-        y_data.append(s_angle)
+
 
     # augment image with brightness
     #add_augmented_brightness(im, s_angle, x_data, y_data, allow_flip)
