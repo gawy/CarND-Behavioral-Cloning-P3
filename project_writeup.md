@@ -53,8 +53,16 @@ Result: no positive impact. Crashed on bridge
 
 ## Experiment x.005
 x.004 changes: introduced dropout to model. In between convolutional layers and before classifier. 
-Training data set - removed near zero values to allow model to train with more shar turns data
+Training data set - removed near zero values to allow model to train with more shar turns data.
+![label distribution](https://www.dropbox.com/s/rhrj90eyzi4ez0o/Screenshot%202017-07-16%2021.47.19.png?dl=0)
 
-Retraining for 5 epochs: 
-Result: 
+Retraining for 15 epochs: 
+Result: Does sharp turns when can go straight.
+Validation error stuck at a certain level - seems like overfitting
+
+## Experiment x.006
+x.005 changes: flip enabled with 60% probability, for side images too
+
+Retraining for 15 epochs: 
+Result:
 

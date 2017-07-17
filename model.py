@@ -15,6 +15,8 @@ import cv2
 import math
 import time
 import pydot_ng
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from sklearn.utils import shuffle as sk_shuffle
@@ -59,7 +61,9 @@ def drive_model_create():
     model.add(Dropout(0.4))
 
     model.add(Dense(1164, activation='relu'))
+    model.add(Dropout(0.5))
     model.add(Dense(100, activation='relu'))
+    model.add(Dropout(0.2))
     model.add(Dense(50, activation='relu'))
     model.add(Dense(10, activation='relu'))
 
@@ -71,10 +75,15 @@ def drive_model_create():
 
 
 # Executes training code for any Keras model.
-def train_in_driving_with_generator(train_gen, valid_gen, train_data_len, valid_data_len, model, epochs_count=3):
+def train_in_driving_with_generator(train_gen, valid_gen, train_data_len, valid_data_len, model, epochs_count=3,
+                                    label_name=''):
     log = logging.getLogger(__name__)
 
     log.info('Start trainig...')
+
+    lbl = ''
+    if len(label_name):
+        lbl = '-' + label_name
 
     #Compile and train model
     model.compile('adam', 'mean_squared_error')
@@ -82,7 +91,7 @@ def train_in_driving_with_generator(train_gen, valid_gen, train_data_len, valid_
                         validation_steps=valid_data_len)
 
     log.info('Saving model to model.h5')
-    model.save("model.h5")
+    model.save("model{}.h5".format(lbl))
 
     log.info(history_object.history['loss'])
     log.info(history_object.history['val_loss'])
@@ -93,7 +102,9 @@ def train_in_driving_with_generator(train_gen, valid_gen, train_data_len, valid_
     plt.ylabel('mean squared error loss')
     plt.xlabel('epoch')
     plt.legend(['training set', 'validation set'], loc='upper right')
-    plt.savefig('training_loss.png', bbox_inches='tight')
+
+
+    plt.savefig('training_loss{}.png'.format(lbl), bbox_inches='tight')
 
 
 # To spead up training and in case we have enough memory and small enough model, all data is loaded into memory
@@ -181,8 +192,8 @@ def load_samples(samples, only_main_image=False):
         if only_main_image: continue #skip side images
 
         correction_angle = 0.25
-        load_image(l_im_path, s_angle + correction_angle, x_data, y_data, allow_flip=False)
-        load_image(r_im_path, s_angle - correction_angle, x_data, y_data, allow_flip=False)
+        load_image(l_im_path, s_angle + correction_angle, x_data, y_data, allow_flip=True)
+        load_image(r_im_path, s_angle - correction_angle, x_data, y_data, allow_flip=True)
     log.debug('Processing image files: converting X...')
     # Normalize them
     x_data = np.array(x_data)
@@ -215,7 +226,7 @@ def load_image(im_path, s_angle, x_data, y_data, allow_flip=True, main_only=True
 
     if main_only: return
 
-    if allow_flip:
+    if allow_flip and rnd.random() < 0.6:
         # add flipped images to avoid one side bias
         y_data.append(-(s_angle))
         x_data.append(np.fliplr(im))
@@ -254,6 +265,7 @@ if __name__ == '__main__' :
     parser = argparse.ArgumentParser()
     parser.add_argument('epochs', type=int, default=3, help='Amount of epochs to run training for')
     parser.add_argument('--model', nargs='?', const='', default='', help='Model file to use as a start')
+    parser.add_argument('--label', nargs='?', const='', default='', help='Optional name to be added to output files')
     parser.add_argument('-d', action='store_true', help='Debug mode')
 
     args = parser.parse_args()
@@ -275,7 +287,8 @@ if __name__ == '__main__' :
     else:
         log.info('Creating a new model configuration')
         model = drive_model_create()# create_vgg()
-    train_in_driving_with_generator(train_gen, valid_gen, train_steps, valid_steps, model, epochs_count)
+    train_in_driving_with_generator(train_gen, valid_gen, train_steps, valid_steps, model, epochs_count,
+                                    label_name=args.label)
     # plot_model(model, to_file='model.png')
 
 
