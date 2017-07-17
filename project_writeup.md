@@ -101,5 +101,15 @@ x.008 approach to filtering image data set.
 Flip by it self is only probabilistic (70%) but main image is always present.
 Batch size increased
 
-Retraining for 15 epochs. Full sample set
-Result: 
+Retraining for 5 epochs. Full sample set
+Result: Deviates to left and crosses the line at the start
+
+#### Experiment x.011
+x.008 changes: instead of just evening the data, we are removing near zero images but keeping their side images.
+Which means 2 spikes at 0.25 angles. Let's see what will happen. Hypothesis: jiggling car.
+Flip: False
+[chart](https://www.dropbox.com/s/7zml1b8f5iolue1/Screenshot%202017-07-17%2012.59.15.png?dl=0)
+
+Retraining for 5 epochs. Full sample set
+Result:
+

@@ -182,18 +182,18 @@ def load_samples(samples, only_main_image=False):
     y_data = []
     for row in samples:
         s_angle = float(row[3])
-        # if abs(s_angle) < 0.05 and rnd.random() <= 0.65: continue
-        # if abs(s_angle) < 0.2 and rnd.random() <= 0.85: continue
-
         im_path, l_im_path, r_im_path = row[0], row[1], row[2]
 
-        load_image(im_path, s_angle, x_data, y_data, main_only=only_main_image, allow_flip=True)
+        if not(abs(s_angle) < 0.05 and rnd.random() <= 0.65 \
+            or abs(s_angle) < 0.2 and rnd.random() <= 0.85):
+            load_image(im_path, s_angle, x_data, y_data, main_only=only_main_image, allow_flip=False)
+
 
         if only_main_image: continue #skip side images
 
         correction_angle = 0.25
-        load_image(l_im_path, s_angle + correction_angle, x_data, y_data, allow_flip=True)
-        load_image(r_im_path, s_angle - correction_angle, x_data, y_data, allow_flip=True)
+        load_image(l_im_path, s_angle + correction_angle, x_data, y_data, allow_flip=False)
+        load_image(r_im_path, s_angle - correction_angle, x_data, y_data, allow_flip=False)
     log.debug('Processing image files: converting X...')
     # Normalize them
     x_data = np.array(x_data)
@@ -279,7 +279,7 @@ if __name__ == '__main__' :
     log = logging.getLogger(__name__)
 
     # with generators
-    train_gen, valid_gen, train_steps, valid_steps = create_data_generators(64)
+    train_gen, valid_gen, train_steps, valid_steps = create_data_generators(128)
     log.info('Train set len={}, valid_len={}'.format(train_steps, valid_steps))
 
     if len(args.model) > 0:
