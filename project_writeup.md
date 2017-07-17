@@ -113,3 +113,11 @@ Flip: False
 Retraining for 5 epochs. Full sample set
 Result:
 
+#### Experiment x.012
+x.011 changes: dropping more almost zero and less close to zero angles. Getting to more uniform data distribution. 
+Flip: True
+[chart](https://www.dropbox.com/s/iwt5eu9m785rsl6/Screenshot%202017-07-17%2013.21.21.png?dl=0)
+
+Retraining for 5 epochs. Full sample set (approx 10769 images after augmentation)
+Result:
+

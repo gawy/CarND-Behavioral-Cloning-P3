@@ -184,16 +184,18 @@ def load_samples(samples, only_main_image=False):
         s_angle = float(row[3])
         im_path, l_im_path, r_im_path = row[0], row[1], row[2]
 
-        if not(abs(s_angle) < 0.05 and rnd.random() <= 0.65 \
+        if (abs(s_angle) < 0.02 and rnd.random() <= 0.99
             or abs(s_angle) < 0.2 and rnd.random() <= 0.85):
-            load_image(im_path, s_angle, x_data, y_data, main_only=only_main_image, allow_flip=False)
 
+            continue
+
+        load_image(im_path, s_angle, x_data, y_data, main_only=only_main_image, allow_flip=True)
 
         if only_main_image: continue #skip side images
 
         correction_angle = 0.25
-        load_image(l_im_path, s_angle + correction_angle, x_data, y_data, allow_flip=False)
-        load_image(r_im_path, s_angle - correction_angle, x_data, y_data, allow_flip=False)
+        load_image(l_im_path, s_angle + correction_angle, x_data, y_data, allow_flip=True)
+        load_image(r_im_path, s_angle - correction_angle, x_data, y_data, allow_flip=True)
     log.debug('Processing image files: converting X...')
     # Normalize them
     x_data = np.array(x_data)
