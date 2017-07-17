@@ -21,11 +21,11 @@ Several Gb is not a problem but speed ups process
 
 ## Experiment log (started after migrated to Nvidia DL model)
 
-## Experiment x.001
+#### Experiment x.001
 Setup: no flip, central + side images (correction=0.25)
 Result: model deviates to left side and crashes on the bridge
 
-## Experiment x.002
+#### Experiment x.002
 Setup: no flip, central + side images (correction=0.25)
 Dropped 80% of images with angles below 0.05 in absolute
 Model: nvidia based
@@ -35,7 +35,7 @@ Result: decent drive. Passed turn 1, near crash on bridge (might be due to remov
  complete miss on turn 2
 
 
-## Experiment x.003
+#### Experiment x.003
 x.002 changes: instead of dropping images with stearing angle near zero on initial read of the file it was moved to 
 generator. Which means we will be dropping different images on every epoch. 
 This is to avoid potentially loosing some valuable training images when straight line is different from other cases 
@@ -45,24 +45,52 @@ Retraining for 2 epochs:
 Result: gone of track turn 1
 
 
-## Experiment x.004
+#### Experiment x.004
 x.002 changes: added flipped images to the training set. Flip image is added for every center image in the training set. 
 
 Retraining for 2 epochs: 
 Result: no positive impact. Crashed on bridge
 
-## Experiment x.005
+#### Experiment x.005
 x.004 changes: introduced dropout to model. In between convolutional layers and before classifier. 
 Training data set - removed near zero values to allow model to train with more shar turns data.
 ![label distribution](https://www.dropbox.com/s/rhrj90eyzi4ez0o/Screenshot%202017-07-16%2021.47.19.png?dl=0)
 
-Retraining for 15 epochs: 
+Retraining for 30 epochs. Samples used 1258
 Result: Does sharp turns when can go straight.
-Validation error stuck at a certain level - seems like overfitting
+Validation error stuck at a certain level - seems like overfitting.
+More training allowed to pass critical corners but car takes to may turns when it is not needed. But not consistent.
 
-## Experiment x.006
+Try to fine-tune it with full data set
+
+#### Experiment x.006
 x.005 changes: flip enabled with 60% probability, for side images too
+Added more dropouts to the model.
 
-Retraining for 15 epochs: 
-Result:
+Retraining for 30 epochs. Samples used 1258
+Result: Not satisfactory. Car did not pass the first turn.
 
+#### Experiment x.007
+x.006 changes: Retrain x.006 on full data set 
+
+Retraining for 15 epochs. Samples used 8038.
+Result: bad. Ran off into water
+
+#### Experiment x.008
+x.005 changes: Flip is now 50% with original image (either one is selected based on a random number) 
+```
+if abs(s_angle) < 0.05 and rnd.random() <= 0.65: continue
+if abs(s_angle) < 0.2 and rnd.random() <= 0.85: continue
+```
+is used for dropping images in generator (in run time).
+
+Retraining for 30 epochs. Samples used (random).
+Start fresh.
+
+Result: Ran into self-oscilating scenario
+
+#### Experiment x.008
+x.008 changes: Train with full data set
+
+Retraining for 15 epochs. Full sample set
+Result: completely failed

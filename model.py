@@ -142,8 +142,8 @@ def create_data_generators(batch_size=32):
 
         for row in csv_reader:
             s_angle = float(row[3])
-            if abs(s_angle) < 0.05 and rnd.random() <= 0.85: continue
-            if abs(s_angle) < 0.2 and rnd.random() <= 0.85: continue
+            # if abs(s_angle) < 0.05 and rnd.random() <= 0.85: continue
+            # if abs(s_angle) < 0.2 and rnd.random() <= 0.85: continue
             samples.append(row)
 
     # samples = samples[:500]
@@ -182,8 +182,8 @@ def load_samples(samples, only_main_image=False):
     y_data = []
     for row in samples:
         s_angle = float(row[3])
-        # if abs(s_angle) < 0.05 and rnd.random() <= 0.8:
-        #     continue
+        # if abs(s_angle) < 0.05 and rnd.random() <= 0.65: continue
+        # if abs(s_angle) < 0.2 and rnd.random() <= 0.85: continue
 
         im_path, l_im_path, r_im_path = row[0], row[1], row[2]
 
@@ -220,16 +220,18 @@ def load_image(im_path, s_angle, x_data, y_data, allow_flip=True, main_only=True
 
     rand = rnd.random()
 
-    # process image
-    x_data.append(im)
-    y_data.append(s_angle)
 
-    if main_only: return
 
-    if allow_flip and rnd.random() < 0.6:
+    # if main_only: return
+
+    if not main_only and allow_flip and rnd.random() < 0.5:
         # add flipped images to avoid one side bias
         y_data.append(-(s_angle))
         x_data.append(np.fliplr(im))
+    else:
+        # process image
+        x_data.append(im)
+        y_data.append(s_angle)
 
     # augment image with brightness
     #add_augmented_brightness(im, s_angle, x_data, y_data, allow_flip)
