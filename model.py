@@ -35,29 +35,23 @@ def drive_model_create():
     k_size = (5,5)
 
     model = Sequential()
-    model.add(Cropping2D(((60, 20), (0, 0)), input_shape=image_size))
+    model.add(Cropping2D(((60, 20), (0, 0)), input_shape=image_size)) #80x320x3
     model.add(Lambda(lambda x: x / 255.0 - 0.5))
 
-    model.add(Convolution2D(24, k_size, padding='same', strides=(2,2))) #80x160x24
-    model.add(Activation('relu'))
+    model.add(Convolution2D(24, k_size, padding='valid', strides=(2,2), activation='relu')) #38x158x24
+    model.add(MaxPool2D((4,4), strides=(1,1), padding='same'))
 
-    model.add(Convolution2D(36, k_size, padding='same', strides=(2,2))) #40x80x36
-    model.add(Activation('relu'))
+    model.add(Convolution2D(36, k_size, padding='valid', strides=(2,2), activation='relu')) #17x37x36
+    model.add(MaxPool2D((2,2), strides=(1,1), padding='same'))
 
-    model.add(Dropout(0.5))
+    model.add(Convolution2D(48, k_size, padding='valid', strides=(2,2), activation='relu')) #6x16x48
+    model.add(MaxPool2D((2,2), strides=(1,1), padding='same'))
 
-    model.add(Convolution2D(48, k_size, padding='same', strides=(2,2))) #20x40x48
-    model.add(Activation('relu'))
+    model.add(Convolution2D(64, (3,3), padding='valid', activation='relu')) # 5x15x64
 
-    model.add(Convolution2D(64, (3,3), padding='same')) # 20x40x64
-    model.add(Activation('relu'))
+    model.add(Convolution2D(64, (3,3), padding='valid', activation='relu')) #4x14x64
 
-    model.add(Dropout(0.5))
-
-    model.add(Convolution2D(64, (3,3), padding='same')) #20x40x64
-    model.add(Activation('relu'))
-
-    model.add(Flatten())
+    model.add(Flatten())  #3584
     model.add(Dropout(0.4))
 
     model.add(Dense(1164, activation='relu'))

@@ -118,6 +118,12 @@ x.011 changes: dropping more almost zero and less close to zero angles. Getting 
 Flip: True
 [chart](https://www.dropbox.com/s/iwt5eu9m785rsl6/Screenshot%202017-07-17%2013.21.21.png?dl=0)
 
-Retraining for 5 epochs. Full sample set (approx 10769 images after augmentation)
-Result:
+Retraining for 5 epochs. Full sample set (approx 6370 images after augmentation)
+Result: (skipped to x.013)
 
+
+#### Experiment x.013
+x.012 changes: maxpool on all convolutional levels 
+
+Retraining for 5 epochs. Full sample set ()
+Result: faster training (suspicious). Wiggly driving and broke on a bridge.
