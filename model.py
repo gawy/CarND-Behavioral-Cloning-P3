@@ -178,8 +178,8 @@ def load_samples(samples, only_main_image=False):
         s_angle = float(row[3])
         im_path, l_im_path, r_im_path = row[0], row[1], row[2]
 
-        if (abs(s_angle) < 0.02 and rnd.random() <= 0.99
-            or abs(s_angle) < 0.2 and rnd.random() <= 0.85):
+        if (abs(s_angle) < 0.02 and rnd.random() <= 0.95
+            or abs(s_angle) < 0.2 and rnd.random() <= 0.75):
 
             continue
 
@@ -187,9 +187,8 @@ def load_samples(samples, only_main_image=False):
 
         if only_main_image: continue #skip side images
 
-        correction_angle = 0.25
-        load_image(l_im_path, s_angle + correction_angle, x_data, y_data, allow_flip=True)
-        load_image(r_im_path, s_angle - correction_angle, x_data, y_data, allow_flip=True)
+        load_image(l_im_path, f_angle(s_angle, 1), x_data, y_data, allow_flip=True)
+        load_image(r_im_path, f_angle(s_angle, -1), x_data, y_data, allow_flip=True)
     log.debug('Processing image files: converting X...')
     # Normalize them
     x_data = np.array(x_data)
@@ -200,6 +199,15 @@ def load_samples(samples, only_main_image=False):
     # log.debug(x_data[10])
     # log.debug(y_data[:20])
     return x_data, y_data
+
+
+def f_angle (angle, direction):
+    a = angle + direction * 0.25
+    if a > 1:
+        return 1
+    elif a < -1:
+        return -1
+    return a
 
 
 # Read image file via provided path
@@ -214,8 +222,6 @@ def load_image(im_path, s_angle, x_data, y_data, allow_flip=True, main_only=True
     im = cv2.imread('./data/IMG' + path)
     # im = cv2.resize(im, (224,224,3), interpolation=cv2.INTER_AREA)
 
-    rand = rnd.random()
-
     # process image
     x_data.append(im)
     y_data.append(s_angle)
@@ -224,7 +230,7 @@ def load_image(im_path, s_angle, x_data, y_data, allow_flip=True, main_only=True
 
     if allow_flip and rnd.random() < 0.7:
         # add flipped images to avoid one side bias
-        y_data.append(-(s_angle))
+        y_data.append(-s_angle)
         x_data.append(np.fliplr(im))
 
 

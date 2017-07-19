@@ -127,3 +127,11 @@ x.012 changes: maxpool on all convolutional levels
 
 Retraining for 5 epochs. Full sample set ()
 Result: faster training (suspicious). Wiggly driving and broke on a bridge.
+
+#### Experiment x.014
+x.012 changes: adjusted filtering of images (found error in simulated calculations) 
+[chart](https://www.dropbox.com/s/25eno7lmd2qoa7s/Screenshot%202017-07-18%2001.13.33.png?dl=0)
+
+Retraining for 10 epochs. Full sample set ()
+Result: not bad but got to shikana turn
+
