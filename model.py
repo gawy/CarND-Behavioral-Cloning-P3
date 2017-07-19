@@ -158,12 +158,12 @@ def input_generator(data, batch_size=32, is_for_validation=False):
     while 1:
         for offset in range(0, data_length, batch_size):
             samples = data[offset:offset + batch_size]
-            log.debug('Batch offset:{}, len:{}'.format(offset, len(samples)))
+            # log.debug('Batch offset:{}, len:{}'.format(offset, len(samples)))
             t = time.time()
 
             x_data, y_data = load_samples(samples, is_for_validation)
 
-            log.debug('Data batch ready in {}'.format(time.time() - t))
+            log.debug('Data batch ready in {}, actual len={}, offset={}'.format(time.time() - t, y_data.shape[0], offset))
             yield x_data, y_data
 
 
@@ -235,11 +235,13 @@ def load_image(im_path, s_angle, x_data, y_data, flip_probability=1.0, main_only
 
 
     # augment image with brightness
-    #add_augmented_brightness(im, s_angle, x_data, y_data, allow_flip)
-    #add_augmented_brightness(im, s_angle, x_data, y_data, allow_flip)
+
+    if s_angle > 0.4:
+        add_augmented_brightness(im, s_angle, x_data, y_data, 0.5)
+        add_augmented_brightness(im, s_angle, x_data, y_data, 0.5)
 
 
-def add_augmented_brightness(im, s_angle, x_data, y_data, allow_flip):
+def add_augmented_brightness(im, s_angle, x_data, y_data, flip_probability=0.5):
     """
     Augments im brightness.
     Also performs randomisation on whether to select original image or horizontaly flipped.
@@ -249,17 +251,22 @@ def add_augmented_brightness(im, s_angle, x_data, y_data, allow_flip):
     s_angel - steering angle
     x_data - array of image data to append result to
     y_data - array of steering angles to add result to
-    :param allow_flip:
+    :param flip_probability: how often to use flipped image
     """
-    if rnd.random() < 0.1: return # skip in 20% cases
+    # if rnd.random() < 0.1: return # skip in 20% cases
 
     b_low = 80
     b_high = 150
 
-    aug_image = im if rnd.randint(0, 1) == 0 or not allow_flip else np.fliplr(im)
+    aug_image = im
+    if rnd.random() < flip_probability:
+        aug_image = np.fliplr(im)
+        y_data.append(-s_angle)
+    else:
+        y_data.append(s_angle)
+
     b = rnd.randint(b_low, b_high) * (rnd.randint(0, 1) * 2 - 1)
     x_data.append(cv2.convertScaleAbs(aug_image, alpha=1, beta=b))
-    y_data.append(s_angle)
 
 
 # Execute when ran from terminal

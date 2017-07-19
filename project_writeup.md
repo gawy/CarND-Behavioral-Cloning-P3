@@ -143,3 +143,9 @@ Retraining for 15 epochs. Full sample set (18172)
 Result: very good - done several laps. There is some problems in tricky left turn without right line but overall very good.
 Done part of the 2nd track - stuck in the very sharp turn. Still need more data for sharp turns.
 
+#### Experiment x.016
+x.015 changes: Added 2 brightness augmented images for sharp turns to increase data set volume (for angles over 0.4)
+Found mistake in brightness augmentation code. 
+
+Retraining for 15 epochs. Full sample set
+Result: not that good. constantly turns on straights and missed "after bridge" turn
