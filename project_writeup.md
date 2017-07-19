@@ -135,3 +135,11 @@ x.012 changes: adjusted filtering of images (found error in simulated calculatio
 Retraining for 10 epochs. Full sample set ()
 Result: not bad but got to shikana turn
 
+#### Experiment x.015
+x.014 changes: drop only angles below 0.05. Always flip main image. 0.7 flip for side images
+[chart](https://www.dropbox.com/s/jcgpnzjuw82jv41/Screenshot%202017-07-19%2000.18.15.png?dl=0)
+
+Retraining for 15 epochs. Full sample set (18172)
+Result: very good - done several laps. There is some problems in tricky left turn without right line but overall very good.
+Done part of the 2nd track - stuck in the very sharp turn. Still need more data for sharp turns.
+

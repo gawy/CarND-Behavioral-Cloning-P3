@@ -178,17 +178,17 @@ def load_samples(samples, only_main_image=False):
         s_angle = float(row[3])
         im_path, l_im_path, r_im_path = row[0], row[1], row[2]
 
-        if (abs(s_angle) < 0.02 and rnd.random() <= 0.95
-            or abs(s_angle) < 0.2 and rnd.random() <= 0.75):
+        if (abs(s_angle) < 0.05 and rnd.random() <= 0.98):
+            # or (abs(s_angle) < 0.2 and rnd.random() <= 0.85):
 
             continue
 
-        load_image(im_path, s_angle, x_data, y_data, main_only=only_main_image, allow_flip=True)
+        load_image(im_path, s_angle, x_data, y_data, main_only=only_main_image, flip_probability=1.0)
 
         if only_main_image: continue #skip side images
 
-        load_image(l_im_path, f_angle(s_angle, 1), x_data, y_data, allow_flip=True)
-        load_image(r_im_path, f_angle(s_angle, -1), x_data, y_data, allow_flip=True)
+        load_image(l_im_path, f_angle(s_angle, 1), x_data, y_data, flip_probability=0.7)
+        load_image(r_im_path, f_angle(s_angle, -1), x_data, y_data, flip_probability=0.7)
     log.debug('Processing image files: converting X...')
     # Normalize them
     x_data = np.array(x_data)
@@ -216,7 +216,7 @@ def f_angle (angle, direction):
 # x_data - image data
 # y_data - steering angles for corresponding images
 # main_only - load only main image without augmentations
-def load_image(im_path, s_angle, x_data, y_data, allow_flip=True, main_only=True):
+def load_image(im_path, s_angle, x_data, y_data, flip_probability=1.0, main_only=True):
 
     path = im_path[im_path.rfind('/'):]
     im = cv2.imread('./data/IMG' + path)
@@ -228,7 +228,7 @@ def load_image(im_path, s_angle, x_data, y_data, allow_flip=True, main_only=True
 
     if main_only: return
 
-    if allow_flip and rnd.random() < 0.7:
+    if rnd.random() < flip_probability:
         # add flipped images to avoid one side bias
         y_data.append(-s_angle)
         x_data.append(np.fliplr(im))
