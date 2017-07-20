@@ -187,7 +187,7 @@ Seems like because we are dropping a lot of images with zero values model either
 x.021 changes: greyscale for flips too. Probability 50%. Added also brightness augmentation 
 
 Retraining for 15 epochs. Full sample set
-Result: 
+Result: went straight of the track
 
 #### Experiment x.023
 x.022 changes: fine-tune x.022 on full dataset without removing close to zero angles. 
@@ -195,3 +195,8 @@ x.022 changes: fine-tune x.022 on full dataset without removing close to zero an
 Fine tuning for 3 epochs. 
 Result: too biased to going straight - failed
 
+#### Experiment x.024
+x.022 changes: disabled brightness augmentation 
+
+Retraining for 15 epochs. Full sample set
+Result: failed. Some problem with Grey images

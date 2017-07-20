@@ -163,6 +163,7 @@ def input_generator(data, batch_size=32, is_for_validation=False):
             t = time.time()
 
             x_data, y_data = load_samples(samples, is_for_validation)
+            if len(y_data) == 0: continue
 
             log.debug('Data batch ready in {}, actual len={}, offset={}'.format(time.time() - t, y_data.shape[0], offset))
             yield x_data, y_data
@@ -232,20 +233,20 @@ def load_image(im_path, s_angle, x_data, y_data, flip_probability=1.0, main_only
     if main_only: return
 
     # add greyscale image
-    add_greyscale(im, s_angle, x_data, y_data)
+    # add_greyscale(im, s_angle, x_data, y_data)
 
     if rnd.random() < flip_probability:
         # add flipped images to avoid one side bias
         fl_im = np.fliplr(im)
         y_data.append(-s_angle)
         x_data.append(fl_im)
-        add_greyscale(fl_im, s_angle, x_data, y_data)
+        # add_greyscale(fl_im, s_angle, x_data, y_data)
 
 
     # augment image with brightness
 
     # if s_angle > 0.4:
-    add_augmented_brightness(im, s_angle, x_data, y_data, 0.5)
+    # add_augmented_brightness(im, s_angle, x_data, y_data, 0.5)
     #     add_augmented_brightness(im, s_angle, x_data, y_data, 0.5)
 
 
