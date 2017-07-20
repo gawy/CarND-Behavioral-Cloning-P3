@@ -178,7 +178,7 @@ def load_samples(samples, only_main_image=False):
         s_angle = float(row[3])
         im_path, l_im_path, r_im_path = row[0], row[1], row[2]
 
-        if (abs(s_angle) < 0.05 and rnd.random() <= 0.98):
+        if (abs(s_angle) < 0.05 and rnd.random() <= 0.93):
             # or (abs(s_angle) < 0.2 and rnd.random() <= 0.85):
 
             continue
@@ -236,9 +236,9 @@ def load_image(im_path, s_angle, x_data, y_data, flip_probability=1.0, main_only
 
     # augment image with brightness
 
-    if s_angle > 0.4:
-        add_augmented_brightness(im, s_angle, x_data, y_data, 0.5)
-        add_augmented_brightness(im, s_angle, x_data, y_data, 0.5)
+    # if s_angle > 0.4:
+    #     add_augmented_brightness(im, s_angle, x_data, y_data, 0.5)
+    #     add_augmented_brightness(im, s_angle, x_data, y_data, 0.5)
 
 
 def add_augmented_brightness(im, s_angle, x_data, y_data, flip_probability=0.5):

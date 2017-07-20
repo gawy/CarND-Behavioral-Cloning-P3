@@ -149,3 +149,9 @@ Found mistake in brightness augmentation code.
 
 Retraining for 15 epochs. Full sample set
 Result: not that good. constantly turns on straights and missed "after bridge" turn
+
+#### Experiment x.017
+x.015 changes: kept more center images (0.93 drop rate)
+
+Retraining for 15 epochs. Full sample set
+Result: does not turn in sharp corners at all and even turns oposite 
