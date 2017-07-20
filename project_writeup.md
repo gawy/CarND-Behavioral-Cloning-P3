@@ -178,10 +178,20 @@ Result: failed on the bridge but good behaviour overall
 #### Experiment x.021
 x.020 changes: removed some maxpool layers and dropout layers.
 
-Retraining for 12 epochs. Full sample set
+Retraining for 15 epochs. Full sample set
 Result: strange after the bridge - went off the road. "need more minerals"
+Seems like because we are dropping a lot of images with zero values model either do not generalize well 
+(no signs of overfiting). Let's try additional epoch with full dataset.
 
+#### Experiment x.022
+x.021 changes: greyscale for flips too. Probability 50%. Added also brightness augmentation 
 
+Retraining for 15 epochs. Full sample set
+Result: 
 
+#### Experiment x.023
+x.022 changes: fine-tune x.022 on full dataset without removing close to zero angles. 
 
+Fine tuning for 3 epochs. 
+Result: too biased to going straight - failed
 

@@ -24,6 +24,8 @@ from sklearn.model_selection import train_test_split
 
 image_size = (160, 320, 3)
 
+drop_zero_samples = True
+
 
 # Creates DL model inpired by LeNet
 # returns: model object
@@ -177,13 +179,12 @@ def load_samples(samples, only_main_image=False):
         s_angle = float(row[3])
         im_path, l_im_path, r_im_path = row[0], row[1], row[2]
 
-        if (abs(s_angle) < 0.05 and rnd.random() <= 0.95):
-            continue
+        if drop_zero_samples:
+            if (abs(s_angle) < 0.05 and rnd.random() <= 0.95):
+                continue
 
-        if(abs(s_angle) < 0.2 and rnd.random() <= 0.85):
-            continue
-
-
+            if(abs(s_angle) < 0.2 and rnd.random() <= 0.85):
+                continue
 
         load_image(im_path, s_angle, x_data, y_data, main_only=only_main_image, flip_probability=1.0)
 
@@ -231,22 +232,37 @@ def load_image(im_path, s_angle, x_data, y_data, flip_probability=1.0, main_only
     if main_only: return
 
     # add greyscale image
-    if rnd.random() < 0.6:
-        grey = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-        x_data.append(cv2.cvtColor(grey, cv2.COLOR_GRAY2BGR))
-        y_data.append(s_angle)
+    add_greyscale(im, s_angle, x_data, y_data)
 
     if rnd.random() < flip_probability:
         # add flipped images to avoid one side bias
+        fl_im = np.fliplr(im)
         y_data.append(-s_angle)
-        x_data.append(np.fliplr(im))
+        x_data.append(fl_im)
+        add_greyscale(fl_im, s_angle, x_data, y_data)
 
 
     # augment image with brightness
 
     # if s_angle > 0.4:
+    add_augmented_brightness(im, s_angle, x_data, y_data, 0.5)
     #     add_augmented_brightness(im, s_angle, x_data, y_data, 0.5)
-    #     add_augmented_brightness(im, s_angle, x_data, y_data, 0.5)
+
+
+def add_greyscale(im, s_angle, x_data, y_data):
+    """
+    Add a greyscale version of the image to training data.
+
+    :param im: image to convert to greyscale
+    :param s_angle: steering angle for input image
+    :param x_data: array that will be used to add new image
+    :param y_data: label array to add steering angle
+    :return:
+    """
+    if rnd.random() < 0.5:
+        grey = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+        x_data.append(cv2.cvtColor(grey, cv2.COLOR_GRAY2BGR))
+        y_data.append(s_angle)
 
 
 def add_augmented_brightness(im, s_angle, x_data, y_data, flip_probability=0.5):
@@ -261,9 +277,10 @@ def add_augmented_brightness(im, s_angle, x_data, y_data, flip_probability=0.5):
     y_data - array of steering angles to add result to
     :param flip_probability: how often to use flipped image
     """
-    # if rnd.random() < 0.1: return # skip in 20% cases
+    if rnd.random() < 0.5:
+        return
 
-    b_low = 80
+    b_low = 100
     b_high = 150
 
     aug_image = im
@@ -277,6 +294,14 @@ def add_augmented_brightness(im, s_angle, x_data, y_data, flip_probability=0.5):
     x_data.append(cv2.convertScaleAbs(aug_image, alpha=1, beta=b))
 
 
+def str2bool(v):
+    """
+    :param v: input string to parse
+    :return: True if string is in ("yes", "true", "t", "1")
+    """
+
+    return v.lower() in ("yes", "true", "t", "1")
+
 # Execute when ran from terminal
 
 if __name__ == '__main__' :
@@ -285,6 +310,7 @@ if __name__ == '__main__' :
     parser.add_argument('--model', nargs='?', const='', default='', help='Model file to use as a start')
     parser.add_argument('--label', nargs='?', const='', default='', help='Optional name to be added to output files')
     parser.add_argument('-d', action='store_true', help='Debug mode')
+    parser.add_argument('-drop', type=str2bool, nargs='?', const=False, default=True, help='Drop samples with near zero steering angles')
 
     args = parser.parse_args()
     epochs_count = args.epochs
@@ -295,8 +321,11 @@ if __name__ == '__main__' :
         logging.basicConfig(level=logging.INFO)
     log = logging.getLogger(__name__)
 
+    drop_zero_samples = args.drop
+    log.debug('Drop is set to {}'.format(drop_zero_samples))
+
     # with generators
-    train_gen, valid_gen, train_steps, valid_steps = create_data_generators(128)
+    train_gen, valid_gen, train_steps, valid_steps = create_data_generators(64)
     log.info('Train set len={}, valid_len={}'.format(train_steps, valid_steps))
 
     if len(args.model) > 0:
