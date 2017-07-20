@@ -175,6 +175,13 @@ x.019 changes: removed more images at the center - added conditions to drop 85% 
 Retraining for 12 epochs. Full sample set
 Result: failed on the bridge but good behaviour overall
 
-Result: 
+#### Experiment x.021
+x.020 changes: removed some maxpool layers and dropout layers.
+
+Retraining for 12 epochs. Full sample set
+Result: strange after the bridge - went off the road. "need more minerals"
+
+
+
 
 
