@@ -142,6 +142,7 @@ x.014 changes: drop only angles below 0.05. Always flip main image. 0.7 flip for
 Retraining for 15 epochs. Full sample set (18172)
 Result: very good - done several laps. There is some problems in tricky left turn without right line but overall very good.
 Done part of the 2nd track - stuck in the very sharp turn. Still need more data for sharp turns.
+Retrained model the same does not show consistent performance.
 
 #### Experiment x.016
 x.015 changes: Added 2 brightness augmented images for sharp turns to increase data set volume (for angles over 0.4)
@@ -155,3 +156,18 @@ x.015 changes: kept more center images (0.93 drop rate)
 
 Retraining for 15 epochs. Full sample set
 Result: does not turn in sharp corners at all and even turns oposite 
+
+#### Experiment x.018
+x.015 changes: replaced maxpool with dropout
+
+Retraining for 15 epochs. Full sample set
+Result: no big difference
+
+#### Experiment x.019
+x.015 changes: added greyscale image as addition to dataset 
+
+Retraining for 15 epochs. Full sample set
+Result: failed. Biased to right.
+ 
+
+

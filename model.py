@@ -228,6 +228,12 @@ def load_image(im_path, s_angle, x_data, y_data, flip_probability=1.0, main_only
 
     if main_only: return
 
+    # add greyscale image
+    if rnd.random() < 0.6:
+        grey = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+        x_data.append(cv2.cvtColor(grey, cv2.COLOR_GRAY2BGR))
+        y_data.append(s_angle)
+
     if rnd.random() < flip_probability:
         # add flipped images to avoid one side bias
         y_data.append(-s_angle)
