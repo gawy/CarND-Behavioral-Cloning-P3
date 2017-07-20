@@ -168,6 +168,13 @@ x.015 changes: added greyscale image as addition to dataset
 
 Retraining for 15 epochs. Full sample set
 Result: failed. Biased to right.
- 
+
+#### Experiment x.020
+x.019 changes: removed more images at the center - added conditions to drop 85% of below 0.2 angels
+
+Retraining for 12 epochs. Full sample set
+Result: failed on the bridge but good behaviour overall
+
+Result: 
 
 

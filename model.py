@@ -178,10 +178,13 @@ def load_samples(samples, only_main_image=False):
         s_angle = float(row[3])
         im_path, l_im_path, r_im_path = row[0], row[1], row[2]
 
-        if (abs(s_angle) < 0.05 and rnd.random() <= 0.93):
-            # or (abs(s_angle) < 0.2 and rnd.random() <= 0.85):
-
+        if (abs(s_angle) < 0.05 and rnd.random() <= 0.95):
             continue
+
+        if(abs(s_angle) < 0.2 and rnd.random() <= 0.85):
+            continue
+
+
 
         load_image(im_path, s_angle, x_data, y_data, main_only=only_main_image, flip_probability=1.0)
 
