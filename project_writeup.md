@@ -200,3 +200,11 @@ x.022 changes: disabled brightness augmentation
 
 Retraining for 15 epochs. Full sample set
 Result: failed. Some problem with Grey images
+
+#### Experiment x.025
+x.024 changes: more pooling and dropout in layers. No grey or brightness augmented
+Added additional verification logic to have some basic picture on how model reacts on all length of the track. 
+Feeding images of one circle and comparing steering angles to recorded for training.
+
+Retraining for 15 epochs. Full sample set
+Result: 

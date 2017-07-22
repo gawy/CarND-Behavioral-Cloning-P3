@@ -44,9 +44,10 @@ def drive_model_create():
     model.add(MaxPool2D((4,4), strides=(1,1), padding='same'))
 
     model.add(Convolution2D(36, k_size, padding='valid', strides=(2,2), activation='relu')) #17x37x36
-    model.add(Dropout(0.3))
+    model.add(MaxPool2D((2,2), strides=(1,1), padding='same'))
 
     model.add(Convolution2D(48, k_size, padding='valid', strides=(2,2), activation='relu')) #6x16x48
+    model.add(MaxPool2D((2,2), strides=(1,1), padding='same'))
 
     model.add(Convolution2D(64, (3,3), padding='valid', activation='relu')) # 5x15x64
 
@@ -58,8 +59,9 @@ def drive_model_create():
     model.add(Dense(1164, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(100, activation='relu'))
-    model.add(Dropout(0.2))
+    model.add(Dropout(0.5))
     model.add(Dense(50, activation='relu'))
+    model.add(Dropout(0.5))
     model.add(Dense(10, activation='relu'))
 
     model.add(Dense(1))
@@ -124,7 +126,7 @@ def read_all_data_to_memory():
 
 # Read CSV file and create train/validation geneators that will be used while training.
 # returns: tuple of (train_generator, valid_generator) - generators to load train and validation data when training
-def create_data_generators(batch_size=32):
+def create_data_generators(batch_size=32, drop_zero_samples=True):
     log = logging.getLogger(__name__)
 
     log.info('Reading csv file...')
@@ -145,7 +147,7 @@ def create_data_generators(batch_size=32):
     train_samples, valid_samples = train_test_split(samples, test_size=0.2)
     log.info('Samples read, {} lines. Sending data to generator...'.format(len(samples)))
 
-    generator_for_train = input_generator(train_samples, batch_size)
+    generator_for_train = input_generator(train_samples, batch_size, )
     generator_for_valid = input_generator(valid_samples, batch_size, is_for_validation=True)
 
     return generator_for_train, generator_for_valid, \
@@ -153,7 +155,16 @@ def create_data_generators(batch_size=32):
 
 
 # Generator to load data for model training
-def input_generator(data, batch_size=32, is_for_validation=False):
+def input_generator(data, batch_size=32, is_for_validation=False, drop_zero_samples=True):
+    """
+
+    :param data:
+    :param batch_size:
+    :param is_for_validation: validation data set will load only center images
+    :param drop_zero_samples: does the generator need to drop samples that have angles near zero
+    :return: yeilds a batch of data on every call. Batch consists fo X, Y and Flag indicating last batch in the data set
+     Flag is used to determine when one round of data was already retrieved.
+    """
     log = logging.getLogger(__name__)
     data_length = len(data)
     while 1:
@@ -162,7 +173,7 @@ def input_generator(data, batch_size=32, is_for_validation=False):
             # log.debug('Batch offset:{}, len:{}'.format(offset, len(samples)))
             t = time.time()
 
-            x_data, y_data = load_samples(samples, is_for_validation)
+            x_data, y_data = load_samples(samples, is_for_validation, drop_zero_samples)
             if len(y_data) == 0: continue
 
             log.debug('Data batch ready in {}, actual len={}, offset={}'.format(time.time() - t, y_data.shape[0], offset))
@@ -172,7 +183,7 @@ def input_generator(data, batch_size=32, is_for_validation=False):
 # Convenience method used to load batch of data either by generator or as a whole into memory.
 # samples - rows from csv file containing training information.
 # returns: tuple of (x_data, y_data) - image data and steering angles
-def load_samples(samples, only_main_image=False):
+def load_samples(samples, only_main_image=False, drop_zero_samples=True):
     log = logging.getLogger(__name__)
     x_data = []
     y_data = []
@@ -303,6 +314,76 @@ def str2bool(v):
 
     return v.lower() in ("yes", "true", "t", "1")
 
+
+def load_test_data(batch_size=32):
+    """
+    Load csv data from test_driving_log.csv. This is a one circle data from initial data set.
+
+    :return: list of records from csv file with Test data
+    """
+    log = logging.getLogger(__name__)
+
+    log.info('Reading TEST csv file...')
+    # read csv data file
+
+    samples = []
+    with open('./test_driving_log.csv') as f:
+        csv_reader = csv.reader(f)
+        next(csv_reader) #just skip the header line for test data set provided by Udacity
+
+        for row in csv_reader:
+            samples.append(row)
+
+    generator = input_generator(samples, batch_size, is_for_validation=True, drop_zero_samples=True)
+    return generator, math.ceil(len(samples) / batch_size)
+
+
+def evaluate_model_with_test_data(model, generator, iterations_count, label_name=''):
+    """
+    Run model prediction on the set of data and plot results vs initial labels.
+
+    :param model: model to use for prediction
+    :param generator: generator for image data
+    :param iterations_count: amount of iteration to do with generator
+
+    """
+    y_predicted, y_etalon = [], []
+    for i in range(0,iterations_count):
+        x,y = next(generator)
+        y_result = model.predict(x, y.shape[0])
+        y_predicted.extend(y_result)
+        y_etalon.extend(y)
+
+
+    # corner1, bridge start, b_end, Big Left, BL-end, Sharp Right, end, Last left, end
+    way_points = [69, 183, 276, 309, 348, 410, 456, 514, 612]
+    wp_total = 819
+    plt_pt_length = len(y_etalon)
+
+
+    plt.figure(figsize=(24,6))
+    plt.plot(y_predicted, 'r-')
+    plt.plot(y_etalon, 'g--')
+    plt.title('Predicted angle vs sample')
+    plt.ylabel('Angle')
+    plt.xlabel('Sample #')
+    plt.legend(['Predicted', 'Initial'], loc='upper right')
+
+    #add vertical lines to define critical regions on the plot
+    for p in way_points:
+        px = p / wp_total * plt_pt_length
+        plt.axvline(px, ls='--', color='k')
+
+    plt.gca().invert_yaxis()
+
+    lbl = ''
+    if len(label_name):
+        lbl = '-' + label_name
+    plt.savefig('test_vs_recorded_angle{}.png'.format(lbl), bbox_inches='tight')
+
+
+
+
 # Execute when ran from terminal
 
 if __name__ == '__main__' :
@@ -322,11 +403,10 @@ if __name__ == '__main__' :
         logging.basicConfig(level=logging.INFO)
     log = logging.getLogger(__name__)
 
-    drop_zero_samples = args.drop
-    log.debug('Drop is set to {}'.format(drop_zero_samples))
+    log.debug('Drop is set to {}'.format(args.drop))
 
     # with generators
-    train_gen, valid_gen, train_steps, valid_steps = create_data_generators(64)
+    train_gen, valid_gen, train_steps, valid_steps = create_data_generators(64, drop_zero_samples=args.drop)
     log.info('Train set len={}, valid_len={}'.format(train_steps, valid_steps))
 
     if len(args.model) > 0:
@@ -344,3 +424,8 @@ if __name__ == '__main__' :
     # model = drive_model_create()
     # x_data, y_data = read_all_data_to_memory()
     # train_in_driving(x_data, y_data, model, epochs_count)
+
+    ## Test model with test data set and build chart with steering angles comparison
+    log.info('Starting validation on a Test set...')
+    test_generator, test_data_iterations = load_test_data(64)
+    evaluate_model_with_test_data(model, test_generator, test_data_iterations, label_name=args.label)
