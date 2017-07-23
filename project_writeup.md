@@ -1,5 +1,7 @@
 # Behaviour cloning project report
 
+(Resulting video) [https://youtu.be/85wMVQZB0W4]
+
 # How to train
 Model can be trained by simply running `python model.py`
 All neccesary code to create model, read data and train will be executed.
@@ -16,6 +18,7 @@ Even so it gave a good improvement was not satisfactory.
 
 Adding Left and Right images basically increased the data set and allowed for better generalization of the model.
 But still was not enough to do the full track run.
+Basis of data collection was udacity data set.
 
 Important factor here was a randomization of various augmentations. 
 Instead of just taking a flipped version of the image it was a subject to random factor 
@@ -32,6 +35,8 @@ Data was randomly dropped based on the steering angle. 95% of inputs with angle 
 and 85% with angles below +-0.2 were dropped.
 This helped to generalize the model to handle sharp turns as the amount of data with sharp angles had 
 bigger presence in the input data set.
+
+Above mentioned augmentations brought input dataset to about 10 000 images per epoch
 
 # Model
 
@@ -57,6 +62,10 @@ To prevent overfiting and better generalization:
  * max pooling was used for convolutional layers. First max pool has a wider kernel 
  to potentially cover the larger input size and spot larger features. All other pooling layers are 2x2 kernels. 
  All pooling layers have (1,1) stride to keep input dimentions in place. Convolutions reduce it enough by itself.
+
+Adam optimizer is used for training.
+
+Practice showed that training for 15 epochs is usually enough to lower the loss to drive the car in a decent manner.
 
 ## Experiment log (started after migrated to Nvidia DL model)
 
