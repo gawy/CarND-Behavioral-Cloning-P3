@@ -18,6 +18,7 @@ import pydot_ng
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import os.path
 
 from sklearn.utils import shuffle as sk_shuffle
 from sklearn.model_selection import train_test_split
@@ -27,7 +28,7 @@ image_size = (160, 320, 3)
 drop_zero_samples = True
 
 
-# Creates DL model inpired by LeNet
+# Creates DL model
 # returns: model object
 def drive_model_create():
     log = logging.getLogger(__name__)
@@ -174,7 +175,7 @@ def input_generator(data, batch_size=32, is_for_validation=False, drop_zero_samp
             t = time.time()
 
             x_data, y_data = load_samples(samples, is_for_validation, drop_zero_samples)
-            if len(y_data) == 0: continue
+            if y_data is None or len(y_data) == 0: continue
 
             log.debug('Data batch ready in {}, actual len={}, offset={}'.format(time.time() - t, y_data.shape[0], offset))
             yield x_data, y_data
@@ -234,7 +235,11 @@ def f_angle (angle, direction):
 def load_image(im_path, s_angle, x_data, y_data, flip_probability=1.0, main_only=True):
 
     path = im_path[im_path.rfind('/'):]
-    im = cv2.imread('./data/IMG' + path)
+    full_path = './data/IMG' + path
+    if not os.path.isfile(full_path):
+        log.info('File not found: {}'.format(full_path))
+        return
+    im = cv2.imread(full_path)
     # im = cv2.resize(im, (224,224,3), interpolation=cv2.INTER_AREA)
 
     # process image
@@ -340,7 +345,11 @@ def load_test_data(batch_size=32):
 
 def evaluate_model_with_test_data(model, generator, iterations_count, label_name=''):
     """
-    Run model prediction on the set of data and plot results vs initial labels.
+    Run model prediction on the set of test data and plot results vs initial labels.
+    Idea behind this is to have a test data that is basically a one circle around the track.
+    At the end this track data will be used as test data set to predict angles and compared to what was initially recorded.
+    Useful for the case when you need to get idea of how model performs without running the simulator.
+    Especially when training is done in the cloud and large model has to be downloaded.
 
     :param model: model to use for prediction
     :param generator: generator for image data
@@ -387,6 +396,20 @@ def evaluate_model_with_test_data(model, generator, iterations_count, label_name
 # Execute when ran from terminal
 
 if __name__ == '__main__' :
+    """
+    Terminal run will require amount of epochs to run for.
+    By default it will run training of the model on a data set that resides in `data` folder.
+    Data is read from .csv file.
+    `python model.py 3` - run training for 3 epochs. Result will be saved to model.h5
+    `python model.py 3 --label='iterationX'` - will run training for same 3 epochs but all artifacts will be saved with 'iterationX' suffix
+    `python model.py 3 --model='modelX.h5'` - instead of creating a new model will load an existing one and fine-tune it
+
+    -d - will enable log Debug mode. Useful for tracing problems.
+    --drop - allow to enable or disable input datasource filtering. Specifically drop input data with steering angles close to zero.
+
+    """
+
+
     parser = argparse.ArgumentParser()
     parser.add_argument('epochs', type=int, default=3, help='Amount of epochs to run training for')
     parser.add_argument('--model', nargs='?', const='', default='', help='Model file to use as a start')

@@ -11,13 +11,52 @@ Training data has to be placed in `./data` folder.
 On a plain data set model was not performing well and rather often deviating car outside the track.
 
 First strategy that was applied was a simple flip of the image for every image from original data set.
-Even so it gave a good improvement
+Even so it gave a good improvement was not satisfactory.
 
 
-# Code comments
-For simplicity and speed it was decided not to use Generator to load data. 
-Several Gb is not a problem but speed ups process
+Adding Left and Right images basically increased the data set and allowed for better generalization of the model.
+But still was not enough to do the full track run.
 
+Important factor here was a randomization of various augmentations. 
+Instead of just taking a flipped version of the image it was a subject to random factor 
+(if randomly generated number is below certain threshold - add image, otherwise not)
+
+
+Probably the most important improvement came when input data set was made more homogenous by removing lots of inputs 
+with steering angles around zero.
+[before removing](Screenshot 2017-07-16 19.20.55)
+[after removing and adding flip + side images](Screenshot 2017-07-22 20.11.10)
+
+
+Data was randomly dropped based on the steering angle. 95% of inputs with angle around 0+-0.05 
+and 85% with angles below +-0.2 were dropped.
+This helped to generalize the model to handle sharp turns as the amount of data with sharp angles had 
+bigger presence in the input data set.
+
+# Model
+
+After rounds of experiments a model based on Nvidia research was selected.
+It has a good balance between training time and capacity to train.
+
+
+Architecture:
+All inputs are cropped to remove useless noise and normalized to zero mean and -1,1 range
+ 
+
+First convolutional layers have a (5,5) kernel with (2,2) strides. Meaning after each layer input is reduces
+by 2 times. Each layer has 24, 36, 48 filters respectively and is followed by a convolutional layer.
+
+Last 2 convolutional layers have a (3,3) kernel with (1,1) strides.
+
+Top of the endwork ends with 5 fully connected layers. 
+Each of those is followed by a dropout layer.
+
+
+To prevent overfiting and better generalization:
+ * dropout layers were added almost after every fully connected hidden layer
+ * max pooling was used for convolutional layers. First max pool has a wider kernel 
+ to potentially cover the larger input size and spot larger features. All other pooling layers are 2x2 kernels. 
+ All pooling layers have (1,1) stride to keep input dimentions in place. Convolutions reduce it enough by itself.
 
 ## Experiment log (started after migrated to Nvidia DL model)
 
@@ -207,4 +246,12 @@ Added additional verification logic to have some basic picture on how model reac
 Feeding images of one circle and comparing steering angles to recorded for training.
 
 Retraining for 15 epochs. Full sample set
-Result: 
+Result: almost a smooth run. One hickup - model lacks the ability to make very sharp turn. 
+This is seem to be due to the lack of traing data with sharp turns. 
+
+#### Experiment x.026
+x.025 changes: added more recovery data (car going from one side of the track to another and all approaches to 
+side lines are removed from the set.)
+Speed 20
+
+Result: very good. A bit wiggly on Track 1 and performs well on track 2 except for super sharp turn
