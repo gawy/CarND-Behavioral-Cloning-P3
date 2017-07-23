@@ -1,6 +1,7 @@
 # Behaviour cloning project report
 
-[Resulting video](https://youtu.be/85wMVQZB0W4)
+(Resulting video)[https://youtu.be/85wMVQZB0W4]
+
 
 # How to train
 Model can be trained by simply running `python model.py`
